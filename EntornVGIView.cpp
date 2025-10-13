@@ -210,9 +210,12 @@ BEGIN_MESSAGE_MAP(CEntornVGIView, CView)
 		ON_UPDATE_COMMAND_UI(ID_LLUMS_LLUM6, &CEntornVGIView::OnUpdateLlumsLlum6)
 		ON_COMMAND(ID_LLUMS_LLUM7, &CEntornVGIView::OnLlumsLlum7)
 		ON_UPDATE_COMMAND_UI(ID_LLUMS_LLUM7, &CEntornVGIView::OnUpdateLlumsLlum7)
-		ON_COMMAND(ID_PROJECCIO_ORTOGRAFICA, &CEntornVGIView::OnProjeccioOrtografica)
-		ON_UPDATE_COMMAND_UI(ID_PROJECCIO_ORTOGRAFICA, &CEntornVGIView::OnUpdateProjeccioOrtografica)
-		END_MESSAGE_MAP()
+//		ON_COMMAND(ID_PROJECCIO_ORTOGRAFICA, &CEntornVGIView::controlador)
+ON_COMMAND(ID_PROJECCIO_ORTOGRAFICA, &CEntornVGIView::OnProjeccioOrtografica)
+ON_UPDATE_COMMAND_UI(ID_PROJECCIO_ORTOGRAFICA, &CEntornVGIView::OnUpdateProjeccioOrtografica)
+ON_COMMAND(ID_PROJECCIO_AXONOMETRICA, &CEntornVGIView::OnProjeccioAxonometrica)
+ON_UPDATE_COMMAND_UI(ID_PROJECCIO_AXONOMETRICA, &CEntornVGIView::OnUpdateProjeccioAxonometrica)
+END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // Construcción o destrucción de CEntornVGIView
@@ -955,7 +958,11 @@ void CEntornVGIView::OnPaint()
 		glViewport(0, 0, w, h);
 
 // Aquí farem les crides per a definir Viewport, Projecció i Càmara: INICI -------------------------
-
+		ProjectionMatrix = Projeccio_Orto(shader_programID, 0, 0, w, h);
+		ViewMatrix = Vista_Ortografica(shader_programID, 3, OPV.R, c_fons, col_obj, objecte, mida, pas,
+			front_faces, oculta, test_vis,
+			ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
+			eixos, grid, hgrid);
 // Aquí farem les cridesper a definir Viewport, Projecció i Càmara:: FI -------------------------
 		// Dibuixar Model (escena)
 		configura_Escena();     // Aplicar Transformacions Geometriques segons persiana Transformacio i configurar objectes
@@ -966,40 +973,40 @@ void CEntornVGIView::OnPaint()
 		break;
 
 	case ORTO:
-// PROJECCIÓ ORTOGRÀFICA
-// Activació del retall de pantalla
+		// PROJECCIÓ ORTOGRÀFICA
+		// Activació del retall de pantalla
 		glEnable(GL_SCISSOR_TEST);
 
-// Retall
+		// Retall
 		glViewport(0, 0, w, h);
 
-// Fons condicionat al color de fons
-		if ((c_fons.r < 0.5) || (c_fons.g < 0.5) || (c_fons.b<0.5))
+		// Fons condicionat al color de fons
+		if ((c_fons.r < 0.5) || (c_fons.g < 0.5) || (c_fons.b < 0.5))
 			FonsB();
 		else
 			FonsN();
 
-// Entorn VGI: TO DO -> Aquí farem les quatre crides a ProjeccioOrto i Ortografica per obtenir 
-//						les quatre vistes ortogràfiques. De moment n'activem només una de prova
-//						IMPORTANT: DESCOMENTAR LA RESTA QUAN FUNCIONI LA PRIMERA
-// PLANTA (Inferior Esquerra)
+		// Entorn VGI: TO DO -> Aquí farem les quatre crides a ProjeccioOrto i Ortografica per obtenir 
+		//						les quatre vistes ortogràfiques. De moment n'activem només una de prova
+		//						IMPORTANT: DESCOMENTAR LA RESTA QUAN FUNCIONI LA PRIMERA
+		// PLANTA (Inferior Esquerra)
 
-		// Definició de Viewport, Projecció i Càmara
+				// Definició de Viewport, Projecció i Càmara
 		glScissor(0, 0, w / 2, h / 2);
-		ProjectionMatrix = Projeccio_Orto(shader_programID, 0, 0, w/2, h/2);
-		ViewMatrix = Vista_Ortografica(shader_programID, 1, OPV.R, c_fons, col_obj, objecte, mida, pas, 
-			front_faces, oculta, test_vis, 
+		ProjectionMatrix = Projeccio_Orto(shader_programID, 0, 0, w / 2, h / 2);
+		ViewMatrix = Vista_Ortografica(shader_programID, 1, OPV.R, c_fons, col_obj, objecte, mida, pas,
+			front_faces, oculta, test_vis,
 			ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
-			eixos, grid, hgrid);  
+			eixos, grid, hgrid);
 		// Dibuix de l'Objecte o l'Escena
 		configura_Escena();     // Aplicar Transformacions Geometriques segons persiana Transformacio i configurar objectes
 		dibuixa_Escena();		// Dibuix geometria de l'escena amb comandes GL.
 
-// ISOMÈTRICA (Inferior Dreta)
-		// Definició de Viewport, Projecció i Càmara
+		// ISOMÈTRICA (Inferior Dreta)
+				// Definició de Viewport, Projecció i Càmara
 		glScissor(w / 2, 0, w / 2, h / 2);
-		ProjectionMatrix = Projeccio_Orto(shader_programID, w/2, 0, w/2, h/2);
-		ViewMatrix = Vista_Ortografica(shader_programID, 3, OPV.R, c_fons, col_obj, objecte, mida, pas, 
+		ProjectionMatrix = Projeccio_Orto(shader_programID, w / 2, 0, w / 2, h / 2);
+		ViewMatrix = Vista_Ortografica(shader_programID, 3, OPV.R, c_fons, col_obj, objecte, mida, pas,
 			front_faces, oculta, test_vis,
 			ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
 			eixos, grid, hgrid);
@@ -1008,10 +1015,10 @@ void CEntornVGIView::OnPaint()
 		dibuixa_Escena();		// Dibuix geometria de l'escena amb comandes GL.
 
 
-// ALÇAT (Superior Esquerra)
-		// Definició de Viewport, Projecció i Càmara
+		// ALÇAT (Superior Esquerra)
+				// Definició de Viewport, Projecció i Càmara
 		glScissor(0, h / 2, w / 2, h / 2);
-		ProjectionMatrix = Projeccio_Orto(shader_programID, 0, h/2 , w/2, h/2);
+		ProjectionMatrix = Projeccio_Orto(shader_programID, 0, h / 2, w / 2, h / 2);
 		ViewMatrix = Vista_Ortografica(shader_programID, 0, OPV.R, c_fons, col_obj, objecte, mida, pas,
 			front_faces, oculta, test_vis,
 			ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
@@ -1020,11 +1027,11 @@ void CEntornVGIView::OnPaint()
 		configura_Escena();     // Aplicar Transformacions Geom?triques segons persiana Transformacio i configurar objectes
 		dibuixa_Escena();		// Dibuix geometria de l'escena amb comandes GL.
 
-// PERFIL (Superior Dreta)
+		// PERFIL (Superior Dreta)
 
-		// Definició de Viewport, Projecció i Càmara
+				// Definició de Viewport, Projecció i Càmara
 		glScissor(w / 2, h / 2, w / 2, h / 2);
-		ProjectionMatrix = Projeccio_Orto(shader_programID, w/2, h/2, w/2, h/2);
+		ProjectionMatrix = Projeccio_Orto(shader_programID, w / 2, h / 2, w / 2, h / 2);
 		ViewMatrix = Vista_Ortografica(shader_programID, 2, OPV.R, c_fons, col_obj, objecte, mida, pas,
 			front_faces, oculta, test_vis,
 			ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
@@ -1034,9 +1041,10 @@ void CEntornVGIView::OnPaint()
 		dibuixa_Escena();		// Dibuix geometria de l'escena amb comandes GL.
 
 
-// Intercanvia l'escena al front de la pantalla
+		// Intercanvia l'escena al front de la pantalla
 		SwapBuffers(m_pDC->GetSafeHdc());
 		break;
+
 
 	case PERSPECT:
 // PROJECCIÓ PERSPECTIVA
@@ -1108,7 +1116,6 @@ void CEntornVGIView::OnPaint()
 //  Actualitzar la barra d'estat de l'aplicació amb els valors R,A,B,PVx,PVy,PVz
 	Barra_Estat();
 }
-
 
 // configura_Escena: Funcio que configura els parametres de Model i dibuixa les
 //                   primitives OpenGL dins classe Model
@@ -5903,11 +5910,10 @@ std::string CEntornVGIView::CString2String(const CString& cString)
 	return strStd;
 }
 
-
 void CEntornVGIView::OnProjeccioOrtografica()
 {
+	// TODO: Agregue aquí su código de controlador de comandos
 	projeccio = ORTO;
-	eixos = false;
 	mobil = false;
 	zzoom = false;
 	InvalidateRect(NULL, false);
@@ -5915,8 +5921,34 @@ void CEntornVGIView::OnProjeccioOrtografica()
 
 void CEntornVGIView::OnUpdateProjeccioOrtografica(CCmdUI* pCmdUI)
 {
+	// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
 	if (projeccio == ORTO)
+	{
 		pCmdUI->SetCheck(1);
+	}
 	else
+	{
 		pCmdUI->SetCheck(0);
+	}
+}
+
+void CEntornVGIView::OnProjeccioAxonometrica()
+{
+	// TODO: Agregue aquí su código de controlador de comandos
+	projeccio = AXONOM;
+	mobil = true;
+	zzoom = true;
+}
+
+void CEntornVGIView::OnUpdateProjeccioAxonometrica(CCmdUI* pCmdUI)
+{
+	// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
+	if (projeccio == AXONOM)
+	{
+		pCmdUI->SetCheck(1);
+	}
+	else
+	{
+		pCmdUI->SetCheck(0);
+	}
 }
